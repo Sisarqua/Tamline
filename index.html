@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#101827">
-<title>TamLine v0.5 • The Two-Idiot Telephone Exchange</title>
+<title>TamLine v0.6 • The Two-Idiot Telephone Exchange</title>
 <style>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#eaf0fa;background:#0c1423}
 *{box-sizing:border-box} body{margin:0;padding:18px;min-height:100vh;background:radial-gradient(ellipse at top,#22334d,#0c1423 70%)} main{max-width:470px;margin:auto;padding-bottom:22px}
@@ -19,7 +19,7 @@ button{cursor:pointer;border:0;border-radius:13px;background:#344d6b;color:#fff;
 </style>
 </head>
 <body><main>
-<div class="top"><div><div class="muted tiny">THE TWO-IDIOT TELEPHONE EXCHANGE™</div><h1>📞 TamLine <span style="font-size:13px;color:#a8bad1">v0.5</span></h1></div><span class="pill">HTTPS DEMO</span></div>
+<div class="top"><div><div class="muted tiny">THE TWO-IDIOT TELEPHONE EXCHANGE™</div><h1>📞 TamLine <span style="font-size:13px;color:#a8bad1">v0.6</span></h1></div><span class="pill">HTTPS DEMO</span></div>
 
 <section id="home">
 <div class="panel"><h2>Place a simulated incoming call</h2><div class="controls"><button onclick="startCall('tam',false)">🗝️ Call from Tam</button><button onclick="startCall('moth',false)">🦋 Call from Moth</button></div><p class="status" id="status">No active call. Head Office suspiciously quiet.</p></div>
@@ -36,7 +36,7 @@ button{cursor:pointer;border:0;border-radius:13px;background:#344d6b;color:#fff;
 <div id="transcript" class="transcript" aria-live="polite"></div>
 <div class="microw"><button id="micButton" class="primary" onclick="listen()">🎙️ Tap to speak</button><button title="Repeat last reply" aria-label="Repeat last reply" onclick="repeatLast()">🔊</button></div><p id="heard" class="spoken" aria-live="polite"></p><button class="danger wide" style="margin-top:10px" onclick="endCall('Completed')">📵 Hang up</button></div>
 </section>
-<p class="warning center">Prototype only. Speech recognition may use your browser’s online service. No audio is stored by this page. No real phone calls or live AI connection. v0.5 uses scripted branching plus short-term call memory to fake a more natural conversation.</p>
+<p class="warning center">Prototype only. Speech recognition may use your browser’s online service. No audio is stored by this page. No real phone calls or live AI connection. v0.6 uses scripted branching plus short-term call memory to fake a more natural conversation.</p>
 </main>
 <script>
 let current=null,ringTimer=null,clock=null,retryTimer=null,testTimer=null,audio=null,startTime=0,recognition=null;
@@ -58,7 +58,7 @@ function log(s){let el=$('log');if(!el.dataset.started){el.innerHTML='';el.datas
 function syncEvents(){savePrefs();if(!$('events').checked){clearTimeout(testTimer);testTimer=null;$('scheduled').textContent='Event calls disabled. Scheduled test cancelled.';log('Event calls disabled')}else log('Event calls manually enabled')}
 function scheduleTest(){if(!$('events').checked){$('scheduled').textContent='Enable event calls first. Permission denied, even to idiots.';return}clearTimeout(testTimer);let who=$('caller').value;$('scheduled').textContent='Test armed: '+names[who][0]+' will ring in 10 seconds.';testTimer=setTimeout(()=>{testTimer=null;$('scheduled').textContent='Test fired.';if($('events').checked&&!current)startCall(who,false)},10000)}
 function loadVoices(){if(!('speechSynthesis'in window)){$('voicestatus').textContent='Speech synthesis unavailable.';return}voiceList=window.speechSynthesis.getVoices();for(let id of ['tamvoice','mothvoice']){let select=$(id),saved=(id==='tamvoice'?prefs.tamvoice:prefs.mothvoice)||select.value;select.innerHTML='<option value="">Device default</option>';voiceList.forEach((v,i)=>{let opt=document.createElement('option');opt.value=String(i);opt.textContent=v.name+' ('+v.lang+')'+(v.localService?' · local':'');select.appendChild(opt)});if([...select.options].some(o=>o.value===saved))select.value=saved;select.onchange=savePrefs}$('sound').onchange=savePrefs;$('voicestatus').textContent=voiceList.length?voiceList.length+' voices detected. Preview each caller separately.':'No selectable voices reported. Default may still speak.'}
-function say(who,message,onEnd){if(!('speechSynthesis'in window))return;window.speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(message),choice=$(who+'voice').value,selected=choice!==''?voiceList[Number(choice)]:null;if(selected){u.voice=selected;u.lang=selected.lang}u.rate=who==='tam'?1.04:.93;u.pitch=who==='tam'?1:.88;u.onstart=()=>{$('voicestatus').textContent=names[who][0]+' speaking · '+(selected?selected.name:'device default')};u.onerror=e=>{$('voicestatus').textContent='Speech error: '+e.error+'. Try device default.'};u.onend=()=>{if(onEnd)onEnd()};activeUtterance=u;window.speechSynthesis.speak(u)}
+function say(who,message,onEnd){if(!('speechSynthesis'in window))return;window.speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(message),choice=$(who+'voice').value,selected=choice!==''?voiceList[Number(choice)]:null;if(selected){u.voice=selected;u.lang=selected.lang}u.rate=who==='tam'?1.04:.93;u.pitch=who==='tam'?1:.88;u.onstart=()=>{$('voicestatus').textContent=names[who][0]+' speaking · '+(selected?selected.name:'device default')};u.onerror=e=>{if(e.error==='interrupted'||e.error==='canceled')return;$('voicestatus').textContent='Speech error: '+e.error+'. Try device default.'};u.onend=()=>{if(onEnd)onEnd()};activeUtterance=u;window.speechSynthesis.speak(u)}
 function previewVoice(who){say(who,greetings[who])}
 function addBubble(kind,text,extra=''){let t=$('transcript'),b=document.createElement('div');b.className='bubble '+kind+(extra?' '+extra:'');b.textContent=text;t.appendChild(b);t.scrollTop=t.scrollHeight;return b}
 function addSystem(text){addBubble('system',text)}
